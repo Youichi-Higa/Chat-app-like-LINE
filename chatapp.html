@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script
+      src="https://kit.fontawesome.com/cf7bbc35a3.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- 松尾さんがいつも神って言ってるBootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+      crossorigin="anonymous"
+    />
+    <title>chatApp</title>
+    <style>
+      body {
+        position: relative;
+        background-image: url(img/background.jpeg);
+        margin: 0;
+        height: 100vh;
+      }
+      header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #001e43;
+        text-align: center;
+        color: #fff;
+      }
+      h1 {
+        margin: 0;
+        padding: 20px 0 10px;
+        font-size: 16px;
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 5px 5px 10px;
+      }
+      .scroll {
+        overflow: scroll;
+      }
+      #output {
+        padding: 55px 0 0;
+      }
+
+      #output li {
+        padding: 10px;
+        border-radius: 10px;
+        background: #ccc;
+        max-width: 200px;
+        font-size: 15px;
+        word-wrap: break-word;
+        margin: 10px;
+        /* background: #1dcd00; */
+        /* background: #ccc; */
+      }
+      #form {
+        display: flex;
+        width: 100%;
+        background: whitesmoke;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        -webkit-transform: translateX(-50%);
+      }
+      #send_btn {
+        width: 5px;
+        height: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>LINE風チャットアプリ</h1>
+    </header>
+
+    <!-- データ出力場所 -->
+    <div class="scroll">
+      <ul id="output"></ul>
+    </div>
+
+    <!-- 入力場所を作成しよう -->
+    <div id="form">
+      <ul>
+        <li>
+          <label for="name">name</label>
+          <input type="text" id="name" />
+        </li>
+        <li>
+          <textarea name="" id="text" cols="35" rows="3"></textarea>
+        </li>
+      </ul>
+      <div id="send_btn">
+        <button
+          type="button"
+          class="btn btn-outline-primary btn-sm fas fa-paper-plane"
+          id="send"
+        ></button>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- 以下にfirebaseのコードを貼り付けよう -->
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        authDomain: "chat-app07-24ce5.firebaseapp.com",
+        projectId: "chat-app07-24ce5",
+        storageBucket: "chat-app07-24ce5.appspot.com",
+        messagingSenderId: "245334760149",
+        appId: "1:245334760149:web:87cd1c3ccb9131dce6e05c",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+
+      // coundfirebaseの場所を定義する処理
+      let db = firebase.firestore().collection("chat07");
+    </script>
+
+    <script>
+      // 日時をいい感じの形式にする関数
+      function convertFromFirestoreTimestampToDatetime(timestamp) {
+        const _d = timestamp ? new Date(timestamp * 1000) : new Date();
+        const Y = _d.getFullYear();
+        const m = (_d.getMonth() + 1).toString().padStart(2, "0");
+        const d = _d.getDate().toString().padStart(2, "0");
+        const H = _d.getHours().toString().padStart(2, "0");
+        const i = _d.getMinutes().toString().padStart(2, "0");
+        const s = _d.getSeconds().toString().padStart(2, "0");
+        return `${Y}/${m}/${d} ${H}:${i}:${s}`;
+      }
+    </script>
+
+    <script>
+      //  textareaの自動リサイズ（メッセージ部分に被るので無効に）
+      // $(function () {
+      //   $("#text").on("change keyup keydown paste cut", function () {
+      //     if ($(this).outerHeight() > this.scrollHeight) {
+      //       $(this).height(1);
+      //     }
+      //     while ($(this).outerHeight() < this.scrollHeight) {
+      //       $(this).height($(this).height() + 1);
+      //     }
+      //   });
+      // });
+
+      // 送信ボタンを押してデータ送信
+      $("#send").on("click", function () {
+        db.add({
+          // dbが送信先 送信データはオブジェクトの形 // inputの入力値
+          // textareaの入力値
+          name: $("#name").val(),
+          text: $("#text").val(),
+          time: firebase.firestore.FieldValue.serverTimestamp(), // 登録日時
+        });
+        $("#text").val("");
+      });
+
+      // エンターキーを押して送信（スマホのLINE風にしたいので、今回は無効に）
+      // $("#text").on("keydown", function (e) {
+      //   // console.log(e);
+      //   if (e.keyCode == 13) {
+      //     db.add({
+      //       // dbが送信先 送信データはオブジェクトの形 // inputの入力値
+      //       // textareaの入力値
+      //       name: $("#name").val(),
+      //       text: $("#text").val(),
+      //       time: firebase.firestore.FieldValue.serverTimestamp(), // 登録日時
+      //     });
+      //     $("#text").val("");
+      //   }
+      // });
+
+      db.orderBy("time", "asc").onSnapshot(function (querySnapshot) {
+        // onSnapshotでcloud firestoreのデータ変更時に実行される!
+        // querySnapshot.docsにcloud firestoreのデータが配列形式で入る
+        const dataArray = []; // 必要なデータだけが入った新しい配列を作成
+        querySnapshot.docs.forEach(function (doc) {
+          const data = {
+            id: doc.id,
+            data: doc.data(),
+          };
+          dataArray.push(data);
+          console.log(dataArray);
+        });
+
+        const tagArray = []; // `dataArray`は前回出てきたオブジェクトの配列
+        dataArray.forEach(function (data) {
+          tagArray.push(`
+      <li id=${data.id}>
+        <p>${data.data.name}</p>
+        <p>${data.data.text}</p>
+        <p>${convertFromFirestoreTimestampToDatetime(
+          data.data.time.seconds
+        )}</p>
+      </li> `);
+        });
+        $("#output").html(tagArray);
+        // スクロールの開始位置を常に一番下に設定 親要素にcssで「overflow: scroll;」しとく必要あり
+        let target = document.getElementById("output");
+        target.scrollIntoView(false);
+      });
+
+      $(document).ready(function () {
+        hsize = $(window).height();
+        $(".scroll").css("height", hsize - 135 + "px");
+      });
+      $(window).resize(function () {
+        hsize = $(window).height();
+        $(".scroll").css("height", hsize - 135 + "px");
+      });
+    </script>
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
