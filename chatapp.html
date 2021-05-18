@@ -19,16 +19,11 @@
     <title>chatApp</title>
     <style>
       body {
-        position: relative;
         background-image: url(img/background.jpeg);
         margin: 0;
         height: 100vh;
       }
       header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
         background-color: #001e43;
         text-align: center;
         color: #fff;
@@ -43,24 +38,31 @@
         margin: 0;
         padding: 5px 5px 10px;
       }
+      p {
+        margin: 0 0 10px;
+      }
       .scroll {
         overflow: scroll;
       }
-      #output {
-        padding: 55px 0 0;
-      }
 
       #output li {
+        padding: 10px;
+        border-radius: 10px;
+        background: #1dcd00;
+        max-width: 200px;
+        font-size: 15px;
+        word-wrap: break-word;
+        margin: 10px 0 10px auto;
+      }
+      /* .other_message {
         padding: 10px;
         border-radius: 10px;
         background: #ccc;
         max-width: 200px;
         font-size: 15px;
         word-wrap: break-word;
-        margin: 10px;
-        /* background: #1dcd00; */
-        /* background: #ccc; */
-      }
+        margin: 10px 0 10px;
+      } */
       #form {
         display: flex;
         width: 100%;
@@ -212,19 +214,26 @@
         )}</p>
       </li> `);
         });
+
+        // 自分のメッセージは右、他人は左にしたかったけどできなかった！
+        // if (data.data.name != "比嘉") {
+        //   // $(this).parent.removeClass();
+        //   $(this).parent().addClass("other_message");
+        // }
+
         $("#output").html(tagArray);
-        // スクロールの開始位置を常に一番下に設定 親要素にcssで「overflow: scroll;」しとく必要あり
+        // スクロールの開始位置を常に一番下に設定 親要素にcssで「overflow: scroll;」しておく必要あり
         let target = document.getElementById("output");
         target.scrollIntoView(false);
       });
 
       $(document).ready(function () {
         hsize = $(window).height();
-        $(".scroll").css("height", hsize - 135 + "px");
+        $(".scroll").css("height", hsize - 185 + "px");
       });
       $(window).resize(function () {
         hsize = $(window).height();
-        $(".scroll").css("height", hsize - 135 + "px");
+        $(".scroll").css("height", hsize - 185 + "px");
       });
     </script>
 
