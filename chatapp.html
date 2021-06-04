@@ -30,7 +30,7 @@
       }
       h1 {
         margin: 0;
-        padding: 20px 0 10px;
+        padding: 5px 0 5px;
         font-size: 16px;
       }
       ul {
@@ -45,7 +45,7 @@
         overflow: scroll;
       }
 
-      #output li {
+      #me {
         padding: 10px;
         border-radius: 10px;
         background: #1dcd00;
@@ -54,7 +54,7 @@
         word-wrap: break-word;
         margin: 10px 0 10px auto;
       }
-      /* .other_message {
+      #others {
         padding: 10px;
         border-radius: 10px;
         background: #ccc;
@@ -62,7 +62,7 @@
         font-size: 15px;
         word-wrap: break-word;
         margin: 10px 0 10px;
-      } */
+      }
       #form {
         display: flex;
         width: 100%;
@@ -84,7 +84,7 @@
 
   <body>
     <header>
-      <h1>LINE風チャットアプリ</h1>
+      <h1>＜Firebase＞<br />LINE風チャットアプリ</h1>
     </header>
 
     <!-- データ出力場所 -->
@@ -97,7 +97,7 @@
       <ul>
         <li>
           <label for="name">name</label>
-          <input type="text" id="name" />
+          <input class="mb-2" type="text" id="name" />
         </li>
         <li>
           <textarea name="" id="text" cols="35" rows="3"></textarea>
@@ -112,6 +112,9 @@
       </div>
     </div>
 
+    <!-- 音声 -->
+    <audio src="audio/shoryuken.mp3" id="shoryuken" preload="auto"></audio>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <!-- 以下にfirebaseのコードを貼り付けよう -->
     <!-- The core Firebase JS SDK is always required and must be listed first -->
@@ -123,6 +126,7 @@
     <script>
       // Your web app's Firebase configuration
       var firebaseConfig = {
+        apiKey: "AIzaSyC9c6l93JkrsKz8tF3tx7pvBwiqjSWmOEE",
         authDomain: "chat-app07-24ce5.firebaseapp.com",
         projectId: "chat-app07-24ce5",
         storageBucket: "chat-app07-24ce5.appspot.com",
@@ -173,6 +177,10 @@
           time: firebase.firestore.FieldValue.serverTimestamp(), // 登録日時
         });
         $("#text").val("");
+        $(function sound() {
+          $("#shoryuken").get(0).currentTime = 0;
+          $("#shoryuken").get(0).play();
+        });
       });
 
       // エンターキーを押して送信（スマホのLINE風にしたいので、今回は無効に）
@@ -200,7 +208,16 @@
             data: doc.data(),
           };
           dataArray.push(data);
-          console.log(dataArray);
+        });
+
+        console.log(dataArray);
+
+        dataArray.forEach(function (x) {
+          if (x.data.name == "比嘉") {
+            x.id = "me";
+          } else {
+            x.id = "others";
+          }
         });
 
         const tagArray = []; // `dataArray`は前回出てきたオブジェクトの配列
